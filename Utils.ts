@@ -1,5 +1,5 @@
 // Source: https://stackoverflow.com/questions/5933565/how-to-create-initialize-the-file-object-using-file-path-html5
-export const getFileBlob = function (url, cb) {
+export const getFileBlob = function (url: any, cb: any) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", url);
   xhr.responseType = "blob";
@@ -9,7 +9,7 @@ export const getFileBlob = function (url, cb) {
   xhr.send();
 };
 
-export function uuid() {
+export function uuid():string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     var r = (Math.random() * 16) | 0,
       v = c == "x" ? r : (r & 0x3) | 0x8;
@@ -17,22 +17,24 @@ export function uuid() {
   });
 }
 
-export const blobToFile = function (blob, name) {
+export const blobToFile = function (blob: any, name: any) {
+  console.log("In blob file");
   blob.lastModifiedDate = new Date();
   blob.name = name;
   return blob;
 };
 
-export const getFileObject = function (filePathOrUrl, cb) {
-  getFileBlob(filePathOrUrl, function (blob) {
+export const getFileObject = function (filePathOrUrl: any, cb: any) {
+  getFileBlob(filePathOrUrl, function (blob: any) {
     cb(blobToFile(blob, "test.jpg"));
   });
 };
 
 export const getFileObjectAsync = async function (filePathOrUrl: string) {
+  console.log("in get file object async")
   return new Promise((resolve, reject) => {
     try {
-      getFileBlob(filePathOrUrl, function (blob) {
+      getFileBlob(filePathOrUrl, function (blob: any) {
         resolve(blobToFile(blob, "test.jpg"));
       });
     } catch (error) {

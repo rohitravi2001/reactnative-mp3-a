@@ -16,7 +16,7 @@ export default function DetailScreen({ route, navigation }: Props) {
 
   const Bar = () => {
     return (
-      <Appbar.Header>
+      <Appbar.Header style ={{backgroundColor: "#ffffff"}}>
         <Appbar.BackAction onPress={() => navigation.navigate("FeedScreen")} />
         <Appbar.Content title="Socials" />
       </Appbar.Header>

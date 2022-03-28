@@ -16,11 +16,14 @@ export const AppStyles = StyleSheet.create({
   },
   h2: {
     fontSize: 24,
+    marginTop: 5
   },
   h3: {
     fontSize: 20,
   },
   body: {
     fontSize: 14,
+    color: "black",
+ 
   },
 });

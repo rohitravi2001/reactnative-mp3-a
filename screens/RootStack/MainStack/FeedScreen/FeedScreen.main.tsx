@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, FlatList } from "react-native";
-import { Appbar, Card } from "react-native-paper";
+import { View, FlatList, Text } from "react-native";
+import { Appbar, Card, Title, Paragraph } from "react-native-paper";
+import { doc, onSnapshot, collection, getDocs, getFirestore } from "firebase/firestore";
+import {getStorage, ref, getDownloadURL} from "firebase/storage";
 import firebase from "firebase/app";
 import "firebase/firestore";
 import { SocialModel } from "../../../../models/social.js";
@@ -26,7 +28,8 @@ interface Props {
 
 export default function FeedScreen({ navigation }: Props) {
   // TODO: Initialize a list of SocialModel objects in state.
-
+  const [myList, setMyList] = useState<SocialModel[]>([]);
+  const db = getFirestore();
   /* TYPESCRIPT HINT: 
     When we call useState(), we can define the type of the state
     variable using something like this:
@@ -46,25 +49,104 @@ export default function FeedScreen({ navigation }: Props) {
       4. It's probably wise to make sure you can create new socials before trying to 
           load socials on this screen.
   */
+  //STILL NEED TO IMPLMENT ORDERBY
+  useEffect(() => {
+      let socials = [];
+      const q = (collection(db, "socials"));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const docs: SocialModel = {
+          eventName: doc.data().eventName,
+          eventDate: doc.data().eventDate,
+          eventLocation: doc.data().eventLocation,
+          eventDescription: doc.data().eventDescription,
+          eventImage: doc.data().eventImage,
+        };
+              socials.push(docs);
+        });
+        console.log("Current cities in CA: ", socials.join(", "));
+        setMyList(socials);
+        socials = [];
+      });
+  
+     
 
-  const renderItem = ({ item }: { item: SocialModel }) => {
+      return () => {
+        unsubscribe();
+      }
+  }, [db]);
+
+  function getFormattedDate(date: Date) {
+    var year = date.getFullYear();
+  
+    var month = (1 + date.getMonth()).toString();
+    month = month.length > 1 ? month : '0' + month;
+  
+    var day = date.getDate().toString();
+    day = day.length > 1 ? day : '0' + day;
+    
+    return month + '/' + day + '/' + year;
+  }
+
+  function formatAMPM(date: Date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ':' + seconds + " " + ampm;
+    return strTime;
+  }
+
+
+  const renderItem =   ({ item }: { item: SocialModel }) => {
     // TODO: Return a Card corresponding to the social object passed in
     // to this function. On tapping this card, navigate to DetailScreen
-    // and pass this social.
+    // and pass this ssocial.
+    var date = new Date(item.eventDate);
+    
+   return (  
+    <View 
+    style={{
+     padding: 20
+    }}
+>
+   <Card onPress = {() => navigation.navigate("DetailScreen", {social: item})} containerStyle = {{borderRadius: 10}}>
+     <Card.Cover source={{ uri: item.eventImage }} />
+     <Card.Content style={{  padding: 10 }}>
+      <Title style={styles.h2}>{item.eventDescription}</Title>
+      <Paragraph style={styles.body}>{item.eventLocation + " \u2022 " + getFormattedDate(date) +", " + formatAMPM(date)}</Paragraph>
+    </Card.Content>
+   
+      </Card>
+      </View>);
+      
 
-    return null;
-  };
+  }
+
+
 
   const NavigationBar = () => {
     // TODO: Return an AppBar, with a title & a Plus Action Item that goes to the NewSocialScreen.
-    return null;
+    return (
+      <Appbar.Header style ={{backgroundColor: "#ffffff"}}>
+        <Appbar.Content title="Socials" />
+        <Appbar.Action icon="plus" onPress={() => {navigation.navigate('NewSocialScreen')}} />
+      </Appbar.Header>
+    );
   };
 
   return (
     <>
-      {/* Embed your NavigationBar here. */}
+      <NavigationBar />
       <View style={styles.container}>
-        {/* Return a FlatList here. You'll need to use your renderItem method. */}
+      <FlatList
+        data={myList}
+        renderItem={renderItem}
+        keyExtractor={item => item.eventImage}
+      />
       </View>
     </>
   );
